@@ -27,6 +27,10 @@
         .history-item { background: #252525; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
         .history-images img { width: 28px; height: 28px; margin-right: 4px; }
         #status-bar { font-size: 0.8em; color: #888; margin-top: 15px; }
+        .possibilities-section { background: #252525; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #333; max-height: 300px; overflow-y: auto; }
+        .possibilities-title { font-weight: bold; color: #ffcc00; margin-bottom: 10px; text-align: left; }
+        .possibility-item { background: #1e1e1e; padding: 8px; border-radius: 4px; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; border: 1px solid #444; }
+        .possibility-item img { width: 25px; height: 25px; }
     </style>
 </head>
 <body>
@@ -74,6 +78,11 @@
     </div>
 
     <div id="status-bar">Possibilities: 256</div>
+
+    <div id="possibilities-section" class="possibilities-section" style="display:none;">
+        <div class="possibilities-title">Possible Solutions:</div>
+        <div id="possibilities-list"></div>
+    </div>
 
     <div id="history-section" style="margin-top:25px; text-align: left; display:none;">
         <div id="history-list"></div>
@@ -129,6 +138,24 @@
         turnText.innerText = history.length < 2 ? `Turn ${history.length + 1}: Forced` : `Turn ${history.length + 1}: Solving`;
         status.innerText = `Remaining Possibilities: ${possibilities.length}`;
         document.getElementById('btn-back').disabled = history.length === 0;
+
+        // Display possibilities list
+        const possSection = document.getElementById('possibilities-section');
+        const possList = document.getElementById('possibilities-list');
+        
+        if (possibilities.length > 0 && possibilities.length <= 50) {
+            possSection.style.display = "block";
+            possList.innerHTML = possibilities.map(p => `
+                <div class="possibility-item">
+                    ${p.map(it => `<img src="${itemImages[it]}" title="${it}">`).join("")}
+                    <span style="color:#aaa; font-size:0.85em;">${p.join(" • ")}</span>
+                </div>`).join("");
+        } else if (possibilities.length > 50) {
+            possSection.style.display = "block";
+            possList.innerHTML = `<div style="color:#ffcc00; padding:10px; text-align:center;">Too many possibilities (${possibilities.length}) to display all</div>`;
+        } else {
+            possSection.style.display = "none";
+        }
 
         document.getElementById('history-section').style.display = history.length ? "block" : "none";
         document.getElementById('history-list').innerHTML = history.map(h => `
