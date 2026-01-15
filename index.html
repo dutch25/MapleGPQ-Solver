@@ -3,9 +3,43 @@
 <head>
     <title>GPQ Solver - Quick Click</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; text-align: center; padding: 20px; }
-        .container { background: #1e1e1e; max-width: 500px; margin: 0 auto; padding: 25px; border-radius: 12px; border: 1px solid #333; }
-        h2 { color: #ffcc00; margin-bottom: 5px; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: url('background2.png') center/cover no-repeat fixed;
+            color: #e0e0e0; 
+            text-align: center; 
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .container { 
+            background: rgba(30, 30, 30, 0.95); 
+            max-width: 500px; 
+            margin: 0 auto; 
+            padding: 25px; 
+            border-radius: 12px; 
+            border: 1px solid #333;
+            position: relative;
+            z-index: 1;
+        }
+        h2 { color: #ffcc00; margin-bottom: 5px; display: inline-block; margin-right: 10px; }
+        .header-controls { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .header-buttons { display: flex; gap: 10px; }
+        #bg-select { padding: 6px 10px; background: #333; color: #ffcc00; border: 1px solid #666; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #bg-select:hover { background: #444; }
+        .reset-btn { background: none; border: none; color: #666; cursor: pointer; text-decoration: underline; font-size: 0.9em; }
+        .credit { font-size: 1em; color: #666; margin-top: 20px; padding-top: 15px; border-top: 1px solid #444; }
         #turn-indicator { color: #ffcc00; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
         .suggestion-box { background: #252525; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #ffcc00; }
         .visual-display { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
@@ -36,7 +70,16 @@
 <body>
 
 <div class="container">
-    <h2>GPQ Stage 3 Solver</h2>
+    <div class="header-controls">
+        <h2>GPQ Stage 3 Solver</h2>
+        <div class="header-buttons">
+            <select id="bg-select" onchange="changeBackground(this.value)">
+                <option value="background.png">Background 1</option>
+                <option value="background2.png" selected>Background 2</option>
+            </select>
+            <button class="reset-btn" onclick="resetGame()">Full Reset</button>
+        </div>
+    </div>
     <div id="turn-indicator">Turn 1: Setup</div>
     
     <div class="suggestion-box">
@@ -88,7 +131,7 @@
         <div id="history-list"></div>
     </div>
 
-    <button style="background:none; border:none; color:#666; cursor:pointer; margin-top:20px; text-decoration:underline;" onclick="resetGame()">Full Reset</button>
+    <div class="credit">Created by Dutch25</div>
 </div>
 
 <script>
@@ -102,6 +145,17 @@
         const items = Object.keys(itemImages);
         for (let a of items) for (let b of items) for (let c of items) for (let d of items) 
         possibilities.push([a, b, c, d]);
+    }
+
+    function changeBackground(bg) {
+        document.body.style.backgroundImage = `url('${bg}')`;
+        localStorage.setItem('selectedBg', bg);
+    }
+
+    function loadSavedBackground() {
+        const saved = localStorage.getItem('selectedBg') || 'background2.png';
+        document.body.style.backgroundImage = `url('${saved}')`;
+        document.getElementById('bg-select').value = saved;
     }
 
     function setVal(type, val) {
@@ -208,6 +262,7 @@
     }
 
     resetGame();
+    loadSavedBackground();
 </script>
 </body>
 </html>
