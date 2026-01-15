@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GPQ Solver - Quick Click</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; text-align: center; padding: 20px; }
+        .container { background: #1e1e1e; max-width: 500px; margin: 0 auto; padding: 25px; border-radius: 12px; border: 1px solid #333; }
+        h2 { color: #ffcc00; margin-bottom: 5px; }
+        #turn-indicator { color: #ffcc00; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+        .suggestion-box { background: #252525; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #ffcc00; }
+        .visual-display { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .item-icon { width: 50px; height: 50px; background: #333; border-radius: 6px; padding: 5px; border: 1px solid #444; object-fit: contain; }
+        
+        /* Quick Click Button Styling */
+        .input-section { background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .row-label { font-size: 0.9em; color: #aaa; margin-bottom: 8px; display: block; }
+        .btn-group { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
+        .num-btn { width: 45px; height: 40px; border: 1px solid #444; background: #121212; color: #fff; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .num-btn:hover { background: #333; border-color: #ffcc00; }
+        .num-btn.active { background: #ffcc00; color: #000; border-color: #fff; }
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .filter-btn { flex: 2; padding: 15px; background: #ffcc00; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+        .back-btn { flex: 1; padding: 15px; background: #555; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .history-item { background: #252525; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .history-images img { width: 28px; height: 28px; margin-right: 4px; }
+        #status-bar { font-size: 0.8em; color: #888; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>GPQ Stage 3 Solver</h2>
+    <div id="turn-indicator">Turn 1: Setup</div>
+    
+    <div class="suggestion-box">
+        <div id="visual-suggestion" class="visual-display"></div>
+    </div>
+
+    <div class="input-section">
+        <span class="row-label">Correct:</span>
+        <div class="btn-group" id="group-correct">
+            <button class="num-btn" onclick="setVal('correct', 0)">0</button>
+            <button class="num-btn" onclick="setVal('correct', 1)">1</button>
+            <button class="num-btn" onclick="setVal('correct', 2)">2</button>
+            <button class="num-btn" onclick="setVal('correct', 3)">3</button>
+            <button class="num-btn" onclick="setVal('correct', 4)">4</button>
+        </div>
+
+        <span class="row-label">Incorrect:</span>
+        <div class="btn-group" id="group-unknown">
+            <button class="num-btn" onclick="setVal('unknown', 0)">0</button>
+            <button class="num-btn" onclick="setVal('unknown', 1)">1</button>
+            <button class="num-btn" onclick="setVal('unknown', 2)">2</button>
+            <button class="num-btn" onclick="setVal('unknown', 3)">3</button>
+            <button class="num-btn" onclick="setVal('unknown', 4)">4</button>
+        </div>
+
+        <span class="row-label">Unknown:</span>
+        <div class="btn-group" id="group-incorrect">
+            <button class="num-btn" onclick="setVal('incorrect', 0)">0</button>
+            <button class="num-btn" onclick="setVal('incorrect', 1)">1</button>
+            <button class="num-btn" onclick="setVal('incorrect', 2)">2</button>
+            <button class="num-btn" onclick="setVal('incorrect', 3)">3</button>
+            <button class="num-btn" onclick="setVal('incorrect', 4)">4</button>
+        </div>
+    </div>
+
+    <div class="action-btns">
+        <button class="back-btn" id="btn-back" onclick="undoTurn()">BACK</button>
+        <button class="filter-btn" id="btn-filter" onclick="processFeedback()" disabled>FILTER</button>
+    </div>
+
+    <div id="status-bar">Possibilities: 256</div>
+
+    <div id="history-section" style="margin-top:25px; text-align: left; display:none;">
+        <div id="history-list"></div>
+    </div>
+
+    <button style="background:none; border:none; color:#666; cursor:pointer; margin-top:20px; text-decoration:underline;" onclick="resetGame()">Full Reset</button>
+</div>
+
+<script>
+    const itemImages = { "Medal": "medal.png", "Scroll": "scroll.png", "Food": "food.png", "Drink": "drink.gif" };
+    let possibilities = [], history = [], snapshots = [];
+    let currentVals = { correct: null, unknown: null, incorrect: null };
+    const forcedMoves = [["Medal", "Medal", "Scroll", "Scroll"], ["Food", "Food", "Drink", "Drink"]];
+
+    function generateAll() {
+        possibilities = [];
+        const items = Object.keys(itemImages);
+        for (let a of items) for (let b of items) for (let c of items) for (let d of items) 
+        possibilities.push([a, b, c, d]);
+    }
+
+    function setVal(type, val) {
+        currentVals[type] = val;
+        const btns = document.querySelectorAll(`#group-${type} .num-btn`);
+        btns.forEach((btn, i) => btn.className = i === val ? "num-btn active" : "num-btn");
+        
+        const total = (currentVals.correct || 0) + (currentVals.unknown || 0) + (currentVals.incorrect || 0);
+        document.getElementById('btn-filter').disabled = (total !== 4 || currentVals.correct === null || currentVals.unknown === null);
+    }
+
+    function getFeedback(guess, secret) {
+        let c = 0, u = 0;
+        let g = [...guess], s = [...secret];
+        for (let i = 3; i >= 0; i--) if (g[i] === s[i]) { c++; g.splice(i, 1); s.splice(i, 1); }
+        for (let i = 0; i < g.length; i++) { let idx = s.indexOf(g[i]); if (idx !== -1) { u++; s.splice(idx, 1); } }
+        return { c, u };
+    }
+
+    function updateDisplay() {
+        const visual = document.getElementById('visual-suggestion');
+        const turnText = document.getElementById('turn-indicator');
+        const status = document.getElementById('status-bar');
+        
+        const currentGuess = history.length < 2 ? forcedMoves[history.length] : possibilities[0];
+
+        if (possibilities.length === 0 && history.length >= 2) {
+            visual.innerHTML = "<b style='color:#ff4444'>ERROR: CONTRADICTION</b>";
+            status.innerText = "The results from Turn 1 and 2 don't match standard logic.";
+            return;
+        }
+
+        visual.innerHTML = currentGuess.map(it => `<img class="item-icon" src="${itemImages[it]}">`).join("");
+        turnText.innerText = history.length < 2 ? `Turn ${history.length + 1}: Forced` : `Turn ${history.length + 1}: Solving`;
+        status.innerText = `Remaining Possibilities: ${possibilities.length}`;
+        document.getElementById('btn-back').disabled = history.length === 0;
+
+        document.getElementById('history-section').style.display = history.length ? "block" : "none";
+        document.getElementById('history-list').innerHTML = history.map(h => `
+            <div class="history-item">
+                <div class="history-images">${h.guess.map(it => `<img src="${itemImages[it]}">`).join("")}</div>
+                <div style="color:#4ecca3; font-weight:bold;">C:${h.c} U:${h.u} I:${h.i}</div>
+            </div>`).reverse().join("");
+    }
+
+    function processFeedback() {
+        const guess = history.length < 2 ? forcedMoves[history.length] : possibilities[0];
+        
+        // Save snapshot for undo
+        snapshots.push(JSON.parse(JSON.stringify(possibilities)));
+        
+        history.push({ guess, c: currentVals.correct, u: currentVals.unknown, i: currentVals.incorrect });
+
+        const next = possibilities.filter(p => {
+            const res = getFeedback(guess, p);
+            return res.c === currentVals.correct && res.u === currentVals.unknown;
+        });
+
+        if (next.length === 0) {
+            alert("No matches found! Check your numbers or hit BACK to correct a typo.");
+        } else {
+            possibilities = next;
+        }
+
+        // Reset UI buttons
+        currentVals = { correct: null, unknown: null, incorrect: null };
+        document.querySelectorAll('.num-btn').forEach(b => b.className = "num-btn");
+        document.getElementById('btn-filter').disabled = true;
+        updateDisplay();
+    }
+
+    function undoTurn() {
+        if (history.length === 0) return;
+        history.pop();
+        possibilities = snapshots.pop();
+        updateDisplay();
+    }
+
+    function resetGame() {
+        generateAll();
+        history = [];
+        snapshots = [];
+        currentVals = { correct: null, unknown: null, incorrect: null };
+        document.querySelectorAll('.num-btn').forEach(b => b.className = "num-btn");
+        updateDisplay();
+    }
+
+    resetGame();
+</script>
+</body>
+</html>
