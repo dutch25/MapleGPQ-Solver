@@ -1,6 +1,6 @@
 # GPQ Stage 3 Solver
 
-A web-based solver for the **Great Pyramid Quest (GPQ) Stage 3** puzzle from MapleStory. This interactive tool helps players find the correct item combination by analyzing feedback from NPCs.
+A web-based solver for the **Guild Quest (GQ) Stage 3** puzzle from MapleStory. This interactive tool helps players find the correct item combination by analyzing feedback from NPCs.
 
 ## Overview
 
