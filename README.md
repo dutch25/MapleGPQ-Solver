@@ -1,6 +1,6 @@
-# GPQ Stage 3 Solver
+# Guild Quest Solver - Free GPQ Stage 3 Solver for MapleStory
 
-A web-based solver for the **Guild Quest (GQ) Stage 3** puzzle from MapleStory. This interactive tool helps players find the correct item combination by analyzing feedback from NPCs.
+A web-based solver for the **Guild Quest (GQ) Stage 3** puzzle from MapleStory. This interactive tool helps players find the correct item combination by analyzing feedback from NPCs. No installation required - works directly in your browser!
 
 ## Overview
 
@@ -9,17 +9,14 @@ GPQ Stage 3 presents a challenging puzzle where you must determine the correct o
 ## How It Works
 
 1. **Initial Setup**: The solver suggests an item combination based on all 256 possible permutations
-2. **Quick Input**: Input feedback from NPCs - the third value auto-calculates automatically:
-   - Set **any 2 values** → the 3rd auto-fills (e.g., Correct: 2 + Incorrect: 1 = Unknown: 1)
-3. **Filter & Solve**: Click FILTER to eliminate impossible combinations
-4. **Next Guess**: The solver suggests the next best guess
-5. **Repeat**: Continue until you find the solution
+2. **Filter & Solve**: Click FILTER to eliminate impossible combinations
+3. **Next Guess**: The solver suggests the next best guess
+4. **Repeat**: Continue until you find the solution
 
 ## Features
 
 - 🎯 **Smart Suggestions**: Recommends guesses to narrow down possibilities efficiently
 - 📊 **Real-time Filtering**: Instantly eliminates invalid combinations
-- ⚡ **Auto-Calculation**: Set 2 values, the 3rd auto-fills based on total = 4
 - 🔄 **Undo Support**: Go back to previous turns with BACK button
 - 🎨 **Background Selector**: Choose between 2 beautiful fantasy backgrounds
 - 💾 **Persistent Settings**: Your background choice is remembered across reloads
@@ -42,7 +39,6 @@ Simply open `index.html` in any modern web browser:
 3. Try the suggested combination in-game
 4. Input the NPC's feedback using the buttons:
    - Click **Correct**, **Incorrect**, or **Unknown** 
-   - Set any 2 values - the 3rd auto-fills!
 5. Click **FILTER** to eliminate possibilities
 6. The solver suggests your next guess
 7. Repeat until you find the correct combination
@@ -72,14 +68,6 @@ Simply open `index.html` in any modern web browser:
 **Example:** If your guess is `[Medal, Scroll, Food, Drink]` and NPC feedback shows:
 - Correct: 1, Incorrect: 1, Unknown: 2
 - This means: 1 item is correct in position, 1 item isn't used, 2 items are correct but in wrong positions
-
-## Auto-Calculation Examples
-
-- **Correct: 2** + **Incorrect: 1** → Auto-fills **Unknown: 1** ✓
-- **Unknown: 3** + **Incorrect: 1** → Auto-fills **Correct: 0** ✓
-- **Correct: 1** + **Unknown: 2** → Auto-fills **Incorrect: 1** ✓
-
-Set any 2 values and the 3rd calculates automatically!
 
 ## Features in Detail
 
